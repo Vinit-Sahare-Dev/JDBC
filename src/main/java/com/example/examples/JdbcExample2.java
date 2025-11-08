@@ -3,81 +3,70 @@ package com.example.examples;
 import java.sql.*;
 
 public class JdbcExample2 {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
         Connection connection = null;
         Statement statement = null;
         PreparedStatement pstmt = null;
         
-        try {
-            // Step 1: Load the Driver
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            System.out.println("Driver loaded successfully...");
-            
-            // Step 2: Create the Connection
-            connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/sleeping", 
-                "root", 
-                "root"
-            );
-            System.out.println("Connection Created successfully...");
-            
-            // Step 3: Execute queries
-            
-            // Using Statement for static queries
-            statement = connection.createStatement();
-            
-            // Create table
-            String createTable = "CREATE TABLE IF NOT EXISTS emp (" +
-                                "id INT, " +
-                                "name VARCHAR(50), " +
-                                "salary DOUBLE)";
-            statement.executeUpdate(createTable);
-            System.out.println("Table created successfully...");
-            
-            // Insert static data
-            String insertStatic = "INSERT INTO emp VALUES(111,'ratan',10000.45)";
-            statement.executeUpdate(insertStatic);
-            System.out.println("Static data inserted...");
-            
-            // Using PreparedStatement for dynamic queries
-            String insertDynamic = "INSERT INTO emp VALUES(?, ?, ?)";
-            pstmt = connection.prepareStatement(insertDynamic);
-            
-            // Insert multiple dynamic records
-            int[] ids = {112, 113, 114, 115};
-            String[] names = {"anu", "durga", "sravya", "ramya"};
-            double[] salaries = {15000.50, 25000.75, 30000.00, 35000.25};
-            
-            for (int i = 0; i < ids.length; i++) {
-                pstmt.setInt(1, ids[i]);
-                pstmt.setString(2, names[i]);
-                pstmt.setDouble(3, salaries[i]);
-                pstmt.executeUpdate();
-            }
-            System.out.println("Dynamic data inserted using PreparedStatement...");
-            
-            // Update salaries based on condition (like your notes: >10000 +200, >50000 +500)
-            String updateSalary = "UPDATE emp SET salary = CASE " +
-                                "WHEN salary > 50000 THEN salary + 500 " +
-                                "WHEN salary > 10000 THEN salary + 200 " +
-                                "ELSE salary END";
-            statement.executeUpdate(updateSalary);
-            System.out.println("Salaries updated successfully...");
-            
-        } catch (ClassNotFoundException e) {
-            System.out.println("Driver not found: " + e.getMessage());
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-        } finally {
-            // Step 4: Release resources
-            try {
-                if (pstmt != null) pstmt.close();
-                if (statement != null) statement.close();
-                if (connection != null) connection.close();
-                System.out.println("Resources released successfully...");
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
+        // Step 1: Load the Driver
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        System.out.println("Driver loaded successfully...");
+        
+        // Step 2: Create the Connection
+        connection = DriverManager.getConnection(
+            "jdbc:mysql://localhost:3306/sleeping", 
+            "root", 
+            "root"
+        );
+        System.out.println("Connection Created successfully...");
+        
+        // Step 3: Execute queries
+        
+        // Using Statement for static queries
+        statement = connection.createStatement();
+        
+        // Create table
+        String createTable = "CREATE TABLE IF NOT EXISTS emp (" +
+                            "id INT, " +
+                            "name VARCHAR(50), " +
+                            "salary DOUBLE)";
+        statement.executeUpdate(createTable);
+        System.out.println("Table created successfully...");
+        
+        // Insert static data
+        String insertStatic = "INSERT INTO emp VALUES(111,'ratan',10000.45)";
+        statement.executeUpdate(insertStatic);
+        System.out.println("Static data inserted...");
+        
+        // Using PreparedStatement for dynamic queries
+        String insertDynamic = "INSERT INTO emp VALUES(?, ?, ?)";
+        pstmt = connection.prepareStatement(insertDynamic);
+        
+        // Insert multiple dynamic records
+        int[] ids = {112, 113, 114, 115};
+        String[] names = {"anu", "durga", "sravya", "ramya"};
+        double[] salaries = {15000.50, 25000.75, 30000.00, 35000.25};
+        
+        for (int i = 0; i < ids.length; i++) {
+            pstmt.setInt(1, ids[i]);
+            pstmt.setString(2, names[i]);
+            pstmt.setDouble(3, salaries[i]);
+            pstmt.executeUpdate();
         }
+        System.out.println("Dynamic data inserted using PreparedStatement...");
+        
+        // Update salaries based on condition (like your notes: >10000 +200, >50000 +500)
+        String updateSalary = "UPDATE emp SET salary = CASE " +
+                            "WHEN salary > 50000 THEN salary + 500 " +
+                            "WHEN salary > 10000 THEN salary + 200 " +
+                            "ELSE salary END";
+        statement.executeUpdate(updateSalary);
+        System.out.println("Salaries updated successfully...");
+        
+        // Step 4: Release resources
+        if (pstmt != null) pstmt.close();
+        if (statement != null) statement.close();
+        if (connection != null) connection.close();
+        System.out.println("Resources released successfully...");
     }
 }
