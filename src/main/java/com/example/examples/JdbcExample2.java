@@ -14,24 +14,26 @@ public class JdbcExample2 {
         
         // Step 2: Create the Connection
         connection = DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/sleeping", 
+            "jdbc:mysql://localhost:3306/jdbc", 
             "root", 
-            "root"
+            "newpassword"  // Empty password
         );
         System.out.println("Connection Created successfully...");
         
         // Step 3: Execute queries
-        
-        // Using Statement for static queries
         statement = connection.createStatement();
         
-        // Create table
+        // Create table with primary key
         String createTable = "CREATE TABLE IF NOT EXISTS emp (" +
-                            "id INT, " +
+                            "id INT PRIMARY KEY, " +  // Added PRIMARY KEY
                             "name VARCHAR(50), " +
                             "salary DOUBLE)";
         statement.executeUpdate(createTable);
         System.out.println("Table created successfully...");
+        
+        // Clear existing data to avoid duplicates
+        statement.executeUpdate("DELETE FROM emp");
+        System.out.println("Cleared existing data...");
         
         // Insert static data
         String insertStatic = "INSERT INTO emp VALUES(111,'ratan',10000.45)";
@@ -55,13 +57,25 @@ public class JdbcExample2 {
         }
         System.out.println("Dynamic data inserted using PreparedStatement...");
         
-        // Update salaries based on condition (like your notes: >10000 +200, >50000 +500)
-        String updateSalary = "UPDATE emp SET salary = CASE " +
+        // FIXED: Correct salary update logic
+        String updateSalary = "UPDATE emp SET salary = " +
+                            "CASE " +
                             "WHEN salary > 50000 THEN salary + 500 " +
-                            "WHEN salary > 10000 THEN salary + 200 " +
-                            "ELSE salary END";
-        statement.executeUpdate(updateSalary);
-        System.out.println("Salaries updated successfully...");
+                            "WHEN salary > 10000 AND salary <= 50000 THEN salary + 200 " +  // Fixed condition
+                            "ELSE salary " +
+                            "END";
+        int updatedRows = statement.executeUpdate(updateSalary);
+        System.out.println("Salaries updated successfully for " + updatedRows + " rows...");
+        
+        // Display final data
+        System.out.println("\nFinal Employee Data:");
+        ResultSet rs = statement.executeQuery("SELECT * FROM emp ORDER BY id");
+        while (rs.next()) {
+            System.out.println("ID: " + rs.getInt("id") + 
+                             ", Name: " + rs.getString("name") + 
+                             ", Salary: " + rs.getDouble("salary"));
+        }
+        rs.close();
         
         // Step 4: Release resources
         if (pstmt != null) pstmt.close();
